@@ -1,0 +1,36 @@
+{
+  "name": "yauth-kit",
+  "version": "0.0.5",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "test": "jest"
+  },
+  "keywords": [
+    "authentication",
+    "yander",
+    "oauth",
+    "personal"
+  ],
+  "author": "yander",
+  "license": "MIT",
+  "description": "yauth is a simple and flexible authentication client for JavaScript and TypeScript. It supports token-based auth, external logins, password management, and account handling, with built-in storage and Axios interceptors for secure API requests.",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/mocha": "^10.0.10",
+    "axios": "^1.7.9",
+    "jest": "^29.7.0",
+    "jest-mock-axios": "^4.8.0",
+    "ts-jest": "^29.2.6",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "axios": "^1.7.9"
+  },
+  "dependencies": {
+    "yauth-kit": "file:"
+  }
+}
