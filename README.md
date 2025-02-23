@@ -265,7 +265,6 @@ This method is useful when you want to:
 - Modify a **single type** to suit a specific use case, such as customizing the response from the sign-in operation.
 - Keep the other types in the class or function unchanged to avoid unnecessary changes.
 
-Here's the part you requested, focusing on how to configure the endpoint configuration:
 
 ---
 

@@ -17,6 +17,10 @@
   "author": "yander",
   "license": "MIT",
   "description": "yauth is a simple and flexible authentication client for JavaScript and TypeScript. It supports token-based auth, external logins, password management, and account handling, with built-in storage and Axios interceptors for secure API requests.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/y4nder/YAuth-Kit.git"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/mocha": "^10.0.10",
