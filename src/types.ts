@@ -36,6 +36,11 @@ export interface YAuthStorage {
     getUser: <T>() => T;
 }
 
+export interface SignInRequest {
+    email: string;
+    password: string;
+}
+
 export interface AuthResponse {
     email: string;
     access_token: string;

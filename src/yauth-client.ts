@@ -1,12 +1,12 @@
 import Axios, { AxiosResponse, type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
-import { AccountInfoResponse, AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions, YAuthEndpointConfiguration, YAuthStorage } from "./types";
+import { AccountInfoResponse, AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions, YAuthEndpointConfiguration, YAuthStorage } from "./types";
 import { yAuthDefaultStorage } from "./yauth-default-storage";
 import { defaultClientOptions } from "./yauth-default-options";
 
 /**
  * YAuthClient class provides methods for user authentication and account management.
  * 
- * @template TSignInRequest - Type for sign-in request data.
+ * @template TSignInRequest - Type for sign-in request data, extending SignInRequest
  * @template TSignInResponse - Type for sign-in response data, extending AuthResponse.
  * @template TSignUpRequest - Type for sign-up request data.
  * @template TSignUpResponse - Type for sign-up response data, extending AuthResponse.
@@ -16,7 +16,7 @@ import { defaultClientOptions } from "./yauth-default-options";
  * @template TWhoAmIResponse - Type for who am I response data, extending WhoAmIResponse.
  */
 export class YAuthClient<
-    TSignInRequest = any,
+    TSignInRequest extends SignInRequest = SignInRequest,
     TSignInResponse extends AuthResponse = AuthResponse,
     TSignUpRequest = any,
     TSignUpResponse extends AuthResponse = AuthResponse,
@@ -188,12 +188,12 @@ export class YAuthClient<
      */
     public async signIn(data: TSignInRequest): Promise<TSignInResponse> {
         const response = await this.axios.post<TSignInResponse>(`${this.authApiPrefix}${this.getSignInEndpoint()}`, data);
-        const userData = response.data;
-        this.storage.setUser(userData);
-        this.storage.setToken(userData.access_token);
-        this.onSignIn(userData);
+        const user = {email: data.email} as TSignInResponse;
+        this.storage.setUser(user);
+        this.storage.setToken(response.data.access_token);
+        this.onSignIn(user);
 
-        return userData;
+        return user;
     }
 
     /**

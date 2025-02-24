@@ -80,11 +80,21 @@ describe("auth-client", () => {
     })
 
     test("case 4: should call signInEndpoint with correct data and return response", async () => {
-        const mockData = { username: "test", password: "1234" };
+        const mockData = { email:"email@email.com" ,username: "test", password: "1234" };
         const mockResponse = { 
-            username: "leander",
-            access_token: "fake-access-token" 
+            email: "email@email.com",
+            access_token: "fake-access-token" ,
         };
+        const mockReturned = {
+            email: mockResponse.email
+        }
+
+        const mockOnSignIn = jest.fn();
+
+        authClient.onEvents({
+            onSignIn: mockOnSignIn,
+            onSignOut: () => {}
+        });
 
         // Call the method
         const promise = authClient.signIn(mockData);
@@ -93,12 +103,16 @@ describe("auth-client", () => {
         mockAxios.mockResponse({ data: mockResponse });
 
         // Assert the result
-        await expect(promise).resolves.toEqual(mockResponse);
+        console.log(await promise)
+        await expect(promise).resolves.toEqual(mockReturned);
         expect(mockAxios.post).toHaveBeenCalledWith(`${authClient.getAuthApiPrefix()}${authClient.getSignInEndpoint()}`, mockData);
 
         // Check if storage is called
-        expect(mockStorage.setUser).toHaveBeenCalledWith(mockResponse);
+        expect(mockStorage.setUser).toHaveBeenCalledWith({email: mockResponse.email});
         expect(mockStorage.setToken).toHaveBeenCalledWith(mockResponse.access_token);
+
+        // Check if on Signin event as been called
+        expect(mockOnSignIn).toHaveBeenCalledWith(mockReturned);
     });
 
     test("case 5: should call signUpEndpoint with correct data and return response", async () => {
