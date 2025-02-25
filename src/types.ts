@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 
 export type SayHelloProps =  {
     firstName: string,
@@ -39,6 +39,11 @@ export interface YAuthStorage {
 export interface SignInRequest {
     email: string;
     password: string;
+}
+
+export interface SignUpRequest {
+    email: string; 
+    password: string 
 }
 
 export interface AuthResponse {
@@ -82,3 +87,78 @@ export interface WhoAmIResponse {
 }
 
 export type ChallengeMode = 'SignIn' | 'LinkLogin';
+
+///////////////////////////////////////////////////
+
+export type DefaultAuthClientConfig = {
+    signIn: { params: { email: string; password: string }; result: { email: string; token: string } };
+    signUp: { params: { username: string }; result: { sessionId: string } };
+    signOut: { result: { success: boolean } };
+};
+
+export type MergeConfigs<T extends Partial<BaseAuthClientConfig>> = {
+    [K in keyof BaseAuthClientConfig]: T[K] extends object
+      ? T[K] & BaseAuthClientConfig[K] 
+      : BaseAuthClientConfig[K];
+  };
+  
+export interface BaseAuthClientConfig {
+    signIn: {
+        params: SignInRequest;
+        result: AuthResponse;
+    };
+    signUp: {
+        params: SignUpRequest;
+        result: AuthResponse;
+    };
+    signOut: {
+        params?: unknown;
+        result: { success: boolean };
+    };
+    whoAmI : {
+        params?: unknown;
+        result: WhoAmIResponse
+    };
+    refreshToken: {
+        params? : unknown;
+        result: TokenResponse
+    };
+    forgotPassword : {
+        email: string;
+        result?: unknown 
+    },
+    resetPassword : {
+        params: ResetPasswordRequest,
+        result : AxiosResponse
+    },
+
+    //todo add function definitions in yauth-core
+    changePassword: {
+        params: ChangePasswordRequest,
+        result: AxiosResponse
+    }
+    resendEmailConfirm: {
+        params : {email: string},
+        result: AxiosResponse
+    },
+    confirmEmail: {
+        params: {code: string, userId: string}
+        result: AxiosResponse
+    }
+    externalChallenge: {
+        params: ExternalChallengeRequest,
+        result?: unknown 
+    };
+    linkLogin: {
+        params?: unknown,
+        result: AccountInfoResponse
+    };
+    signUpExternal: {
+        params: any
+        result: AuthResponse
+    };
+    signInExternal : {
+        params? : unknown,
+        result: AuthResponse
+    }
+}

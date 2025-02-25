@@ -103,7 +103,6 @@ describe("auth-client", () => {
         mockAxios.mockResponse({ data: mockResponse });
 
         // Assert the result
-        console.log(await promise)
         await expect(promise).resolves.toEqual(mockReturned);
         expect(mockAxios.post).toHaveBeenCalledWith(`${authClient.getAuthApiPrefix()}${authClient.getSignInEndpoint()}`, mockData);
 

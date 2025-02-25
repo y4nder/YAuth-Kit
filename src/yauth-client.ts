@@ -2,6 +2,7 @@ import Axios, { AxiosResponse, type AxiosInstance, type InternalAxiosRequestConf
 import { AccountInfoResponse, AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions, YAuthEndpointConfiguration, YAuthStorage } from "./types";
 import { yAuthDefaultStorage } from "./yauth-default-storage";
 import { defaultClientOptions } from "./yauth-default-options";
+import { authRequestInterceptorFactory } from "./yauth-utils";
 
 /**
  * YAuthClient class provides methods for user authentication and account management.
@@ -391,11 +392,3 @@ export class YAuthClient<
     }
 }
 
-export const authRequestInterceptorFactory = (storage: YAuthStorage) => (config: InternalAxiosRequestConfig) => {
-    const token = storage.getToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    config.headers.Accept = 'application/json';
-    return config;
-};
