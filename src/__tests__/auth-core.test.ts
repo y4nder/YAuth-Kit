@@ -7,6 +7,8 @@ import { defineAuthConfig } from '../yauth-utils';
 const apiBaseUrl = "http://localhost:3000";
 const authApiPrefix = "/auth";
 
+//todo create test react app
+
 const mockStorage: {
     data: Record<string, string>,
     setUser: jest.Mock<void, [any]>,
@@ -296,6 +298,60 @@ describe("YAuth Core", () => {
         });
     });
 
-    // todo link login test cases
+    describe("link login", () => {
+
+        test("called the right path", async () => {
+            const auth = new YAuth(options);
+            mockAxios.post.mockResolvedValueOnce({});
+            const res = await auth.linkLogin();
+            expect(mockAxios.post).toHaveBeenCalledWith("/account/link/external");
+        })
+    })
+
+    describe("link login", () => {
+
+        test("called the right path", async () => {
+            const auth = new YAuth(options);
+            mockAxios.post.mockResolvedValueOnce({});
+            const res = await auth.linkLogin();
+            expect(mockAxios.post).toHaveBeenCalledWith("/account/link/external");
+        })
+    })
+
+    describe("signUp external", () => {
+
+        test("called the right path", async () => {
+            const auth = new YAuth(options);
+            const mockTokenResponse = { data: { access_token: "test_token" } };
+            mockAxios.post.mockResolvedValue(mockTokenResponse);
+
+            const handleExternalResponseSpy = jest.spyOn<any, any>(auth as any, "handleExternalResponse");
+            handleExternalResponseSpy.mockResolvedValue({ id: 1, email: "test@example.com" });
+
+            const res = await auth.signUpExternal({});
+            expect(mockAxios.post).toHaveBeenCalledWith("/auth/signup/external", {});
+            expect(handleExternalResponseSpy).toHaveBeenCalledWith(mockTokenResponse.data, "SignUp");
+        })
+    })
+
+    describe("sign in external", () => {
+        test("calls the correct endpoint", async () => {
+            const auth = new YAuth(options);
+            
+            // Mock Axios post response
+            const mockTokenResponse = { data: { access_token: "test_token" } };
+            mockAxios.post.mockResolvedValue(mockTokenResponse);
+    
+            // Spy on the private method
+            const handleExternalResponseSpy = jest.spyOn<any, any>(auth as any, "handleExternalResponse");
+            handleExternalResponseSpy.mockResolvedValue({ id: 1, email: "test@example.com" });
+    
+            const res = await auth.signInExternal();
+    
+            expect(mockAxios.post).toHaveBeenCalledWith(auth.authApiPrefix + "/signin/external");
+            expect(handleExternalResponseSpy).toHaveBeenCalledWith(mockTokenResponse.data, "SignIn");
+        });
+    });
+    
     
 });
