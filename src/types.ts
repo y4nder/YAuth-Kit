@@ -1,11 +1,5 @@
 import { AxiosInstance, AxiosResponse } from "axios";
 
-export type SayHelloProps =  {
-    firstName: string,
-    lastName?: string,
-    age?: number
-}
-
 export type YAuthClientOptions = {
     apiBaseUrl: string,
     authApiPrefix?: string,
@@ -88,20 +82,17 @@ export interface WhoAmIResponse {
 
 export type ChallengeMode = 'SignIn' | 'LinkLogin';
 
+export type ExternalStrategy = 'SignIn' | 'SignUp'
+
 ///////////////////////////////////////////////////
 
-export type DefaultAuthClientConfig = {
-    signIn: { params: { email: string; password: string }; result: { email: string; token: string } };
-    signUp: { params: { username: string }; result: { sessionId: string } };
-    signOut: { result: { success: boolean } };
-};
 
-export type MergeConfigs<T extends Partial<BaseAuthClientConfig>> = {
+export type MergeConfig<T extends Partial<BaseAuthClientConfig>> = {
     [K in keyof BaseAuthClientConfig]: T[K] extends object
       ? T[K] & BaseAuthClientConfig[K] 
       : BaseAuthClientConfig[K];
   };
-  
+
 export interface BaseAuthClientConfig {
     signIn: {
         params: SignInRequest;
