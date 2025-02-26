@@ -37,7 +37,10 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     private onSignIn: <T>(userData: T) => void = () => {};
     private onSignOut: () => void = () => {};
 
-
+    public configureEndpoints(endpointConfig: Partial<YAuthEndpointConfiguration>) {
+        this.options = { ...this.options, ...endpointConfig };
+    }
+    
     public onEvents(ev: {
         onSignIn: <T>(userData: T) => void;
         onSignOut: () => void;
@@ -46,13 +49,17 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         this.onSignOut = ev.onSignOut;
     }
 
-    async signIn( params: MC<TConfig>["signIn"]["params"]): Promise<MC<TConfig>["signIn"]["result"]> {
+    public getUser<TUser>(){
+        return this.storage.getUser<TUser>();
+    }
+
+    async signIn(params: MC<TConfig>["signIn"]["params"]): Promise<MC<TConfig>["signIn"]["result"]> {
         const response = await this.axios.post<MC<TConfig>["signIn"]["result"]>(`${this.authApiPrefix}${this.options.signInEndpoint}`, params);
-        const user = {email: params.email} as MC<TConfig>["signIn"]["result"];
+        const user = response.data as MC<TConfig>["signIn"]["result"];
         this.storage.setUser(user);
-        this.storage.setToken(response.data.access_token);
+        this.storage.setToken(user.access_token);
         this.onSignIn && this.onSignIn(user);
-        return user as MC<TConfig>["signIn"]["result"];
+        return user;
     }
 
     async signUp(params: MC<TConfig>["signUp"]["params"]): Promise<MC<TConfig>["signUp"]["result"]> {

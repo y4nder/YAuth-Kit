@@ -10,15 +10,15 @@ export type YAuthClientOptions = {
 }
 
 export type YAuthEndpointConfiguration = {
-    signInEndpoint : string;
-    signUpEndpoint : string;
-    signOutEndpoint: string;
-    refreshTokenEndpoint: string;
-    forgotPasswordEndpoint: string;
-    resetPasswordEndpoint: string;
-    changePasswordEndpoint: string;
-    resendEmailConfirmationEndpoint: string;
-    confirmEmailEndpoint: string;
+    signInEndpoint? : string;
+    signUpEndpoint? : string;
+    signOutEndpoint?: string;
+    refreshTokenEndpoint?: string;
+    forgotPasswordEndpoint?: string;
+    resetPasswordEndpoint?: string;
+    changePasswordEndpoint?: string;
+    resendEmailConfirmationEndpoint?: string;
+    confirmEmailEndpoint?: string;
 }
 
 export interface YAuthStorage {
@@ -86,12 +86,16 @@ export type ExternalStrategy = 'SignIn' | 'SignUp'
 
 ///////////////////////////////////////////////////
 
-
+/**
+ * MergeConfig is a powerful type that facilitates the 
+ * creation of configuration objects that can be partially 
+ * customized while still retaining the structure and default 
+ * values of the base configuration.
+ */
 export type MergeConfig<T extends Partial<BaseAuthClientConfig>> = {
     [K in keyof BaseAuthClientConfig]: T[K] extends object
-      ? T[K] & BaseAuthClientConfig[K] 
-      : BaseAuthClientConfig[K];
-  };
+      ? T[K] & BaseAuthClientConfig[K] : BaseAuthClientConfig[K];
+};
 
 export interface BaseAuthClientConfig {
     signIn: {

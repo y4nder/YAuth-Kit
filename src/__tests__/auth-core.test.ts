@@ -75,11 +75,10 @@ describe("YAuth Core", () => {
             const auth = new YAuth(options);
             const mockData = { email: "user@example.com", password: "secure123" };
             const mockResult = { userId: 1, token: "some token" };
-            const mockReturned = { email: "user@example.com" };
             
             const promise = auth.signIn(mockData);
             mockAxios.mockResponse({ data: mockResult });
-            await expect(promise).resolves.toEqual(mockReturned);
+            await expect(promise).resolves.toEqual(mockResult);
         });
 
         test("should sign in with custom data and result", async () => {
@@ -106,8 +105,8 @@ describe("YAuth Core", () => {
             const result = await auth.signIn(mockData);
 
             expect(mockAxios.post).toHaveBeenCalledWith(expect.stringContaining(options.authApiPrefix!), mockData);
-            expect(result).toEqual({ email: "test@example.com" });
-            expect(mockStorage.setUser).toHaveBeenCalledWith({ email: "test@example.com" });
+            expect(result).toEqual(mockResult);
+            expect(mockStorage.setUser).toHaveBeenCalledWith(mockResult);
             expect(mockStorage.setToken).toHaveBeenCalledWith(mockResult.access_token);
         });
     });
