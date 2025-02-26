@@ -37,9 +37,6 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     private onSignIn: <T>(userData: T) => void = () => {};
     private onSignOut: () => void = () => {};
 
-    public configure(config : TConfig) : void {
-        this.config = config as MC<TConfig>;
-    }
 
     public onEvents(ev: {
         onSignIn: <T>(userData: T) => void;

@@ -90,13 +90,15 @@ describe("YAuth Core", () => {
                 gwapo: boolean;
             }
 
-            const authConfig = defineAuthConfig({
+            const signInConfig = defineAuthConfig({
                 signIn: {
                     params: {} as CustomSignIn,
                     result: {} as CustomSignInResult,
                 },
             });
-            const auth = new YAuth(options, authConfig);
+
+            const auth = new YAuth(options, signInConfig);
+        
             const mockData: CustomSignIn = { username: "user123", email: "test@example.com", password: "password123" };
             const mockResult: CustomSignInResult = { email: "test@example.com", access_token: "test-token", gwapo: true };
 
@@ -353,6 +355,38 @@ describe("YAuth Core", () => {
             expect(handleExternalResponseSpy).toHaveBeenCalledWith(mockTokenResponse.data, "SignIn");
         });
     });
+    
+    describe("custom conigurations", () => {
+        test("multiple configurations", () => {
+            interface CustomSignIn extends SignInRequest {
+                username: string;
+            }
+            interface CustomSignInResult extends AuthResponse {
+                gwapo: boolean;
+            }
+
+            const signInConfig = defineAuthConfig({
+                signIn: {
+                    params: {} as CustomSignIn,
+                    result: {} as CustomSignInResult,
+                },
+            });
+            
+            const signOutConfig = defineAuthConfig({
+                signOut: {
+                    params: {} as any,
+                    result: {} as any,
+                },
+            });
+
+            const mergedConfig = defineAuthConfig({
+                ...signInConfig,
+                ...signOutConfig
+            });
+        
+            const auth = new YAuth(options, mergedConfig);
+        })
+    })
     
     
 });
