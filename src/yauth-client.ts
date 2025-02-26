@@ -6,7 +6,7 @@ import { authRequestInterceptorFactory } from "./yauth-utils";
 
 /**
  * YAuthClient class provides methods for user authentication and account management.
- * 
+ * @deprecated This class is deprecated, Use {@link YAuth} instead
  * @template TSignInRequest - Type for sign-in request data, extending SignInRequest
  * @template TSignInResponse - Type for sign-in response data, extending AuthResponse.
  * @template TSignUpRequest - Type for sign-up request data.

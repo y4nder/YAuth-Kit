@@ -1,7 +1,7 @@
 import mockAxios from "jest-mock-axios";
 import { YAuthClient } from "../yauth-client";
 import { YAuthClientOptions } from "../types";
-import { AxiosInstance, AxiosResponse } from "axios";
+import { AxiosInstance } from "axios";
 
 const apiBaseUrl = "http://localhost:3000";
 const authApiPrefix = "/auth";

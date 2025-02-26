@@ -123,7 +123,6 @@ export interface BaseAuthClientConfig {
         result : AxiosResponse
     },
 
-    //todo add function definitions in yauth-core
     changePassword: {
         params: ChangePasswordRequest,
         result: AxiosResponse

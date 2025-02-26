@@ -16,7 +16,7 @@ import { authRequestInterceptorFactory } from "./yauth-utils";
 type MC<T extends Partial<BaseAuthClientConfig>> = MergeConfig<T>;
 
 export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
-    private readonly config: MC<TConfig>;
+    private config: MC<TConfig>;
     public readonly apiBaseUrl: string;
     public readonly authApiPrefix: string;
     private readonly accountApiPrefix: string;
@@ -36,6 +36,10 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
 
     private onSignIn: <T>(userData: T) => void = () => {};
     private onSignOut: () => void = () => {};
+
+    public configure(config : TConfig) : void {
+        this.config = config as MC<TConfig>;
+    }
 
     public onEvents(ev: {
         onSignIn: <T>(userData: T) => void;

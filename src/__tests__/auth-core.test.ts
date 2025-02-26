@@ -8,6 +8,7 @@ const apiBaseUrl = "http://localhost:3000";
 const authApiPrefix = "/auth";
 
 //todo create test react app
+//todo test client configure method
 
 const mockStorage: {
     data: Record<string, string>,
