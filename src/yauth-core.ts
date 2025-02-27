@@ -25,13 +25,35 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     private options: YAuthEndpointConfiguration;
 
     constructor(options: YAuthClientOptions, config?: TConfig) {
+        this.validateOptions(options);
         this.config = (config ?? {}) as MC<TConfig>;
         this.apiBaseUrl = options.apiBaseUrl;
         this.authApiPrefix = options.authApiPrefix || "/auth";
         this.accountApiPrefix = options.accountApiPrefix || "/account";
         this.storage = options.storage || yAuthDefaultStorage;
         this.axios = options.axiosInstance;
-        this.options = options.endpointConfig || defaultClientOptions;
+        this.options = {
+            ...defaultClientOptions,
+            ...(options.endpointConfig || {}),
+        };
+    }
+
+    private validateOptions(options: YAuthClientOptions) {
+        const invalidPrefixes: string[] = [];
+    
+        if (options.authApiPrefix && !options.authApiPrefix?.startsWith("/")) {
+            invalidPrefixes.push("authApiPrefix");
+        }
+    
+        if (options.accountApiPrefix && !options.accountApiPrefix?.startsWith("/")) {
+            invalidPrefixes.push("accountApiPrefix");
+        }
+    
+        if (invalidPrefixes.length > 0) {
+            throw new Error(
+                `The following prefixes must start with '/': ${invalidPrefixes.join(", ")}`
+            );
+        }
     }
 
     private onSignIn: <T>(userData: T) => void = () => {};

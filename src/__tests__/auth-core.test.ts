@@ -7,9 +7,6 @@ import { defineAuthConfig } from '../yauth-utils';
 const apiBaseUrl = "http://localhost:3000";
 const authApiPrefix = "/auth";
 
-//todo create test react app
-//todo test client configure method
-
 const mockStorage: {
     data: Record<string, string>,
     setUser: jest.Mock<void, [any]>,
@@ -387,5 +384,32 @@ describe("YAuth Core", () => {
         })
     })
     
+    test("overriding an endpoint", async () => {
+        const auth = new YAuth({
+            ...options, 
+            authApiPrefix: "/auth2",
+            endpointConfig:{
+                signInEndpoint: "/login"
+            }
+        });
+
+        mockAxios.post.mockResolvedValueOnce({data: {access_token: "some token"}});
+
+        const mockData = {
+            email: 'some@some.com',
+            password: '12345'
+        };
+
+        await auth.signIn(mockData) ;
+
+        expect(mockAxios.post).toHaveBeenCalledWith("/auth2/login", mockData);
+    })
+
+    test("invalid prefix should fail",async () => {
+        expect(() => new YAuth({
+            ...options, 
+            authApiPrefix: "auth2", // ❌ Invalid prefix (missing "/")
+        })).toThrow();
+    })
     
 });

@@ -9,7 +9,7 @@ export const handlers = [
       lastName: 'Maverick',
     })
   }),
-  http.post('https://example.com/auth/signup', () => {
+  http.post('https://example.com/auth/login', () => {
     return HttpResponse.json({
         email: "john@gmail.com",
         access_token: "some token",

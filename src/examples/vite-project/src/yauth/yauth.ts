@@ -1,40 +1,21 @@
-import { AuthResponse, createAxiosInstance } from "../../../../../dist";
-import { SignUpRequest } from "../../../../types";
+import { createAxiosInstance } from "../../../../../dist";
 import { YAuth } from '../../../../yauth-core';
 import { defineAuthConfig } from "../../../../yauth-utils";
+import { registerSchema } from "./register";
 
-export const axiosInstance = createAxiosInstance(import.meta.env.VITE_API_URL || "https://example.com");
+const apiBaseUrl = import.meta.env.VITE_API_URL;
 
-const config = defineAuthConfig({
-    signUp: {
-        params: {} as CustomSignUp,
-        result: {} as AuthResponse,
-    }
+const authConfig = defineAuthConfig({
+    ...registerSchema
 })
 
-//todo merge configurations
-// const endpointConfig: YAuthEndpointConfiguration = {
-//     signInEndpoint: "",
-//     signUpEndpoint: "",
-//     signOutEndpoint: "",
-//     refreshTokenEndpoint: "",
-//     forgotPasswordEndpoint: "",
-//     resetPasswordEndpoint: "",
-//     changePasswordEndpoint: "",
-//     resendEmailConfirmationEndpoint: "",
-//     confirmEmailEndpoint: ""
-// }
+export const axiosInstance = createAxiosInstance(apiBaseUrl);
 
-export const yauth = new YAuth({
-    apiBaseUrl: import.meta.env.VITE_API_URL || "https://example.com",
-    axiosInstance: axiosInstance,
-},config);
-
-
-export interface CustomSignUp extends SignUpRequest {
-    username: string;
-}
-
+export const yauth = new YAuth({ apiBaseUrl, axiosInstance,
+    endpointConfig: {
+        signInEndpoint: "/login",
+    }
+},authConfig);
 
 
 export default yauth;

@@ -15,8 +15,7 @@ const LoginPage = () => {
         return;
       }
       setMessage('Login successful!');
-      yauth.signUp({
-          username: "yander",
+      yauth.signIn({
           email,
           password
       }).then((value) => {
