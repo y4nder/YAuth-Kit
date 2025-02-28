@@ -1,10 +1,5 @@
-import { AxiosInstance } from "axios";
-
-export type SayHelloProps =  {
-    firstName: string,
-    lastName?: string,
-    age?: number
-}
+import { AxiosInstance, AxiosResponse } from "axios";
+import { YAuth } from "./yauth-core";
 
 export type YAuthClientOptions = {
     apiBaseUrl: string,
@@ -13,19 +8,22 @@ export type YAuthClientOptions = {
     storage?: YAuthStorage,
     axiosInstance : AxiosInstance,
     endpointConfig?: YAuthEndpointConfiguration
+    useUserStore?: boolean,
+    useTokenStore?: boolean,
 }
 
 export type YAuthEndpointConfiguration = {
-    signInEndpoint : string;
-    signUpEndpoint : string;
-    signOutEndpoint: string;
-    refreshTokenEndpoint: string;
-    forgotPasswordEndpoint: string;
-    resetPasswordEndpoint: string;
-    changePasswordEndpoint: string;
-    resendEmailConfirmationEndpoint: string;
-    confirmEmailEndpoint: string;
+    signInEndpoint? : string;
+    signUpEndpoint? : string;
+    signOutEndpoint?: string;
+    refreshTokenEndpoint?: string;
+    forgotPasswordEndpoint?: string;
+    resetPasswordEndpoint?: string;
+    changePasswordEndpoint?: string;
+    resendEmailConfirmationEndpoint?: string;
+    confirmEmailEndpoint?: string;
 }
+
 
 export interface YAuthStorage {
     setUser:<T> (userData: T) => void;
@@ -39,6 +37,11 @@ export interface YAuthStorage {
 export interface SignInRequest {
     email: string;
     password: string;
+}
+
+export interface SignUpRequest {
+    email: string; 
+    password: string 
 }
 
 export interface AuthResponse {
@@ -82,3 +85,100 @@ export interface WhoAmIResponse {
 }
 
 export type ChallengeMode = 'SignIn' | 'LinkLogin';
+
+export type ExternalStrategy = 'SignIn' | 'SignUp'
+
+///////////////////////////////////////////////////
+
+/**
+ * MergeConfig is a powerful type that facilitates the 
+ * creation of configuration objects that can be partially 
+ * customized while still retaining the structure and default 
+ * values of the base configuration.
+ */
+export type MergeConfig<T extends Partial<BaseAuthClientConfig>> = {
+    [K in keyof BaseAuthClientConfig]: T[K] extends object
+      ? T[K] & BaseAuthClientConfig[K] : BaseAuthClientConfig[K];
+};
+
+export interface BaseAuthClientConfig {
+    signIn: {
+        params: SignInRequest;
+        result: AuthResponse;
+    };
+    signUp: {
+        params: SignUpRequest;
+        result: AuthResponse;
+    };
+    signOut: {
+        params?: unknown;
+        result: { success: boolean };
+    };
+    whoAmI : {
+        params?: unknown;
+        result: WhoAmIResponse
+    };
+    refreshToken: {
+        params? : unknown;
+        result: TokenResponse
+    };
+    forgotPassword : {
+        email: string;
+        result?: unknown 
+    },
+    resetPassword : {
+        params: ResetPasswordRequest,
+        result : AxiosResponse
+    },
+
+    changePassword: {
+        params: ChangePasswordRequest,
+        result: AxiosResponse
+    }
+    resendEmailConfirm: {
+        params : {email: string},
+        result: AxiosResponse
+    },
+    confirmEmail: {
+        params: {code: string, userId: string}
+        result: AxiosResponse
+    }
+    externalChallenge: {
+        params: ExternalChallengeRequest,
+        result?: unknown 
+    };
+    linkLogin: {
+        params?: unknown,
+        result: AccountInfoResponse
+    };
+    signUpExternal: {
+        params: any
+        result: AuthResponse
+    };
+    signInExternal : {
+        params? : unknown,
+        result: AuthResponse
+    }
+}
+
+
+/**
+ * Extracts the result type from a YAuth instance based on the provided key.
+ *
+ * @template T - The YAuth instance type.
+ * @template K - The key in the BaseAuthClientConfig to extract the result type from.
+ *
+ * @typedef {T extends YAuth<infer C> ? C extends Record<K, { result: infer R }> ? R : AuthResponse : AuthResponse} ExtracYAuthResult
+ * - If T is a YAuth instance with a configuration C, and C has a property K with a result type R, then R is the extracted type.
+ * - Otherwise, defaults to AuthResponse.
+ */
+export type ExtractYAuthResult<
+    T extends YAuth<any>, 
+    K extends keyof BaseAuthClientConfig
+  > 
+  = T extends YAuth<infer C> ?
+      C extends Record<K, { result: infer R }> ?
+        R
+        : AuthResponse
+      : AuthResponse;
+  
