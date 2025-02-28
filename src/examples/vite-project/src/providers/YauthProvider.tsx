@@ -1,22 +1,18 @@
-import React, { createContext, useMemo, useContext } from "react";
-import {AuthResponse } from "../../../../../dist";
+import React, { useMemo } from "react";
+import yauthInstance from "../yauth";
+import { User, YAuthContext, YAuthContextProps } from "../contexts/useYauth";
 
-import yauth from "../yauth/yauth";
-
-const YAuthContext = createContext<YAuthContextProps>({ 
-    user: null 
-} as YAuthContextProps);
 
 export const YAuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = React.useState<AuthResponse | null>(yauth.getUser());
+    const [user, setUser] = React.useState< User | null>(yauthInstance.getUser());
 
-    yauth.initAxiosInterceptors(() => {
+    yauthInstance.initAxiosInterceptors(() => {
         setUser(null);
     });
 
-    yauth.onEvents({
+    yauthInstance.onEvents({
         onSignIn: <T,>(user: T) => {
-            setUser(user as AuthResponse);
+            setUser(user as User);
         },
         onSignOut: () => {
             setUser(null);
@@ -26,7 +22,7 @@ export const YAuthProvider = ({ children }: { children: React.ReactNode }) => {
     const value = useMemo<YAuthContextProps>(
         () => ({
             user,
-            yauth,
+            yauth: yauthInstance,
         }),
         [user]
     );
@@ -34,12 +30,3 @@ export const YAuthProvider = ({ children }: { children: React.ReactNode }) => {
     return <YAuthContext.Provider value={value}>{children}</YAuthContext.Provider>;
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useYAuth = () => {
-    return useContext(YAuthContext);
-};
-
-interface YAuthContextProps {
-    user: AuthResponse | null;
-    yauth: typeof yauth;
-}

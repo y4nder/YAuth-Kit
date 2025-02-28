@@ -1,4 +1,5 @@
 import { AxiosInstance, AxiosResponse } from "axios";
+import { YAuth } from "./yauth-core";
 
 export type YAuthClientOptions = {
     apiBaseUrl: string,
@@ -6,7 +7,9 @@ export type YAuthClientOptions = {
     accountApiPrefix? : string;
     storage?: YAuthStorage,
     axiosInstance : AxiosInstance,
-    endpointConfig?: YAuthEndpointConfiguration
+    yAuthConfig?: YAuthEndpointConfiguration
+    useStorage?: boolean,
+    useTokenStore?: boolean,
 }
 
 export type YAuthEndpointConfiguration = {
@@ -20,6 +23,7 @@ export type YAuthEndpointConfiguration = {
     resendEmailConfirmationEndpoint?: string;
     confirmEmailEndpoint?: string;
 }
+
 
 export interface YAuthStorage {
     setUser:<T> (userData: T) => void;
@@ -156,3 +160,25 @@ export interface BaseAuthClientConfig {
         result: AuthResponse
     }
 }
+
+
+/**
+ * Extracts the result type from a YAuth instance based on the provided key.
+ *
+ * @template T - The YAuth instance type.
+ * @template K - The key in the BaseAuthClientConfig to extract the result type from.
+ *
+ * @typedef {T extends YAuth<infer C> ? C extends Record<K, { result: infer R }> ? R : AuthResponse : AuthResponse} ExtracYAuthResult
+ * - If T is a YAuth instance with a configuration C, and C has a property K with a result type R, then R is the extracted type.
+ * - Otherwise, defaults to AuthResponse.
+ */
+export type ExtracYAuthResult<
+    T extends YAuth<any>, 
+    K extends keyof BaseAuthClientConfig
+  > 
+  = T extends YAuth<infer C> ?
+      C extends Record<K, { result: infer R }> ?
+        R
+        : AuthResponse
+      : AuthResponse;
+  

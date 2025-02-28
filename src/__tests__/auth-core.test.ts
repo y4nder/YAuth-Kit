@@ -388,7 +388,7 @@ describe("YAuth Core", () => {
         const auth = new YAuth({
             ...options, 
             authApiPrefix: "/auth2",
-            endpointConfig:{
+            yAuthConfig:{
                 signInEndpoint: "/login"
             }
         });
@@ -410,6 +410,34 @@ describe("YAuth Core", () => {
             ...options, 
             authApiPrefix: "auth2", // ❌ Invalid prefix (missing "/")
         })).toThrow();
+    })
+
+    test("should use storage and token store", () => {
+        const auth = new YAuth(options);
+
+        expect(auth.useStorage).toBe(true);
+        expect(auth.useTokenStore).toBe(true);
+    })
+
+    test("should override storage mechanism", () => {
+        const auth = new YAuth({...options, useStorage: false});   
+
+        expect(auth.useStorage).toBe(false);
+        expect(auth.useTokenStore).toBe(true);
+    })
+
+    test("should override token store mechanism", () => {
+        const auth = new YAuth({...options, useTokenStore: false});   
+
+        expect(auth.useStorage).toBe(true);
+        expect(auth.useTokenStore).toBe(false);
+    })
+
+    test("should override both store mechanism", () => {
+        const auth = new YAuth({...options, useTokenStore: false, useStorage: false});   
+
+        expect(auth.useStorage).toBe(false);
+        expect(auth.useTokenStore).toBe(false);
     })
     
 });

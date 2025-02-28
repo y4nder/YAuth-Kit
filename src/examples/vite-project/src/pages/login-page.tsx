@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useYAuth } from "../providers/YauthProvider";
-
+import { useYAuth } from "../contexts/useYauth";
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -16,6 +15,7 @@ const LoginPage = () => {
       }
       setMessage('Login successful!');
       yauth.signIn({
+          idNo: 12345,
           email,
           password
       }).then((value) => {

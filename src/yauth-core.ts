@@ -4,7 +4,7 @@ import {
     ExternalStrategy,
     MergeConfig,
     YAuthClientOptions,
-    YAuthEndpointConfiguration,
+    YAuthEndpointConfiguration as YAuthConfigurations,
     YAuthStorage
 } from "./types";
 import { yAuthDefaultStorage } from "./yauth-default-storage";
@@ -12,17 +12,21 @@ import { defaultClientOptions } from "./yauth-default-options";
 import { authRequestInterceptorFactory } from "./yauth-utils";
 
 
+//todo add conditioning on storage mechanisms
+//todo add tests for storage mechanisms
 // type aliasing MergeConfig<T>
 type MC<T extends Partial<BaseAuthClientConfig>> = MergeConfig<T>;
 
 export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
-    private config: MC<TConfig>;
+    private readonly config: MC<TConfig>;
     public readonly apiBaseUrl: string;
     public readonly authApiPrefix: string;
     private readonly accountApiPrefix: string;
     private readonly storage : YAuthStorage;
     private readonly axios : AxiosInstance;
-    private options: YAuthEndpointConfiguration;
+    private options: YAuthConfigurations;
+    private _useStorage: boolean;
+    private _useTokenStore: boolean;
 
     constructor(options: YAuthClientOptions, config?: TConfig) {
         this.validateOptions(options);
@@ -34,8 +38,10 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         this.axios = options.axiosInstance;
         this.options = {
             ...defaultClientOptions,
-            ...(options.endpointConfig || {}),
+            ...(options.yAuthConfig || {}),
         };
+        this._useStorage = options.useStorage ?? true;
+        this._useTokenStore = options.useTokenStore ?? true;
     }
 
     private validateOptions(options: YAuthClientOptions) {
@@ -59,8 +65,20 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     private onSignIn: <T>(userData: T) => void = () => {};
     private onSignOut: () => void = () => {};
 
-    public configureEndpoints(endpointConfig: Partial<YAuthEndpointConfiguration>) {
+    public configureEndpoints(endpointConfig: Partial<YAuthConfigurations>) {
         this.options = { ...this.options, ...endpointConfig };
+    }
+
+    public getOptions() : YAuthConfigurations{
+        return this.options;
+    }
+
+    public get useStorage(): boolean {
+        return this._useStorage;
+    }
+
+    public get useTokenStore(): boolean {
+        return this._useTokenStore;
     }
     
     public onEvents(ev: {
@@ -78,8 +96,8 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     async signIn(params: MC<TConfig>["signIn"]["params"]): Promise<MC<TConfig>["signIn"]["result"]> {
         const response = await this.axios.post<MC<TConfig>["signIn"]["result"]>(`${this.authApiPrefix}${this.options.signInEndpoint}`, params);
         const user = response.data as MC<TConfig>["signIn"]["result"];
-        this.storage.setUser(user);
-        this.storage.setToken(user.access_token);
+        if (this.useStorage) this.storage.setUser(user);
+        if(this.useTokenStore) this.storage.setToken(user.access_token);        
         this.onSignIn && this.onSignIn(user);
         return user;
     }
@@ -216,4 +234,5 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         };
     }
 }
-  
+
+

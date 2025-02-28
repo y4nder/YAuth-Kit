@@ -10,5 +10,5 @@ export const defaultClientOptions : YAuthEndpointConfiguration = {
     resetPasswordEndpoint: "/password/reset",
     changePasswordEndpoint: "/password/change",
     resendEmailConfirmationEndpoint: "/email/confirm/resend",
-    confirmEmailEndpoint: "/email/confirm"
+    confirmEmailEndpoint: "/email/confirm",
 }
