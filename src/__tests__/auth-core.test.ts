@@ -93,7 +93,10 @@ describe("YAuth Core", () => {
                 },
             });
 
-            const auth = new YAuth(options, signInConfig);
+            const auth = new YAuth({...options, 
+                useStorage: true, 
+                useTokenStore: true
+            }, signInConfig);
         
             const mockData: CustomSignIn = { username: "user123", email: "test@example.com", password: "password123" };
             const mockResult: CustomSignInResult = { email: "test@example.com", access_token: "test-token", gwapo: true };
@@ -186,6 +189,7 @@ describe("YAuth Core", () => {
             const result = await auth.refreshToken();
             expect(result).toEqual(mockResult);
             expect(mockAxios.post).toHaveBeenCalledWith("/auth/signin/refresh");
+            expect(mockStorage.setToken).toHaveBeenCalledWith(mockResult.access_token)
         });
     });
 
