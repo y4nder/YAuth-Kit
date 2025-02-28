@@ -7,8 +7,8 @@ export type YAuthClientOptions = {
     accountApiPrefix? : string;
     storage?: YAuthStorage,
     axiosInstance : AxiosInstance,
-    yAuthConfig?: YAuthEndpointConfiguration
-    useStorage?: boolean,
+    endpointConfig?: YAuthEndpointConfiguration
+    useUserStore?: boolean,
     useTokenStore?: boolean,
 }
 
@@ -172,7 +172,7 @@ export interface BaseAuthClientConfig {
  * - If T is a YAuth instance with a configuration C, and C has a property K with a result type R, then R is the extracted type.
  * - Otherwise, defaults to AuthResponse.
  */
-export type ExtracYAuthResult<
+export type ExtractYAuthResult<
     T extends YAuth<any>, 
     K extends keyof BaseAuthClientConfig
   > 

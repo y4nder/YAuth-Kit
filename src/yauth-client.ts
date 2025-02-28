@@ -44,7 +44,7 @@ export class YAuthClient<
         this.accountApiPrefix = options.accountApiPrefix || "/account";
         this.storage = options.storage || yAuthDefaultStorage;
         this.axios = options.axiosInstance;
-        this.options = options.yAuthConfig || defaultClientOptions;
+        this.options = options.endpointConfig || defaultClientOptions;
     }
 
     /**

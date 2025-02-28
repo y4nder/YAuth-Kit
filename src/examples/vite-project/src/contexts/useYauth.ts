@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import yauthInstance from "../yauth";
-import { ExtracYAuthResult } from "../../../../types";
+import { ExtractYAuthResult } from "../../../../types";
 
 export const useYAuth = () => {
     const context = useContext(YAuthContext);
@@ -10,7 +10,7 @@ export const useYAuth = () => {
     return context;
 };
 
-export type User = ExtracYAuthResult<typeof yauthInstance, "signIn">;
+export type User = ExtractYAuthResult<typeof yauthInstance, "signIn">;
 
 
 export const YAuthContext = createContext<YAuthContextProps>({ 

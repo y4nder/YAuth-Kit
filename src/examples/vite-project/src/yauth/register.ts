@@ -1,7 +1,6 @@
 import { AuthResponse } from "../../../../../dist";
 import { SignUpRequest } from "../../../../types";
-import { defineAuthConfig } from "../../../../yauth-utils";
-
+import { defineSchema } from "../../../../yauth-utils";
 
 
 export interface CustomSignUp extends SignUpRequest {
@@ -12,7 +11,7 @@ export interface CustomSignUpResult extends AuthResponse {
     gwapo: boolean;
 }
 
-export const registerSchema = defineAuthConfig({
+export const registerSchema = defineSchema({
     signUp: {
         params: {} as CustomSignUp,
         result: {} as CustomSignUpResult

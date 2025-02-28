@@ -4,7 +4,7 @@ import {
     ExternalStrategy,
     MergeConfig,
     YAuthClientOptions,
-    YAuthEndpointConfiguration as YAuthConfigurations,
+    YAuthEndpointConfiguration,
     YAuthStorage
 } from "./types";
 import { yAuthDefaultStorage } from "./yauth-default-storage";
@@ -15,14 +15,14 @@ import { authRequestInterceptorFactory } from "./yauth-utils";
 type MC<T extends Partial<BaseAuthClientConfig>> = MergeConfig<T>;
 
 export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
-    private readonly config: MC<TConfig>;
+    private config: MC<TConfig>;
     public readonly apiBaseUrl: string;
     public readonly authApiPrefix: string;
     private readonly accountApiPrefix: string;
     private readonly storage? : YAuthStorage;
     private readonly axios : AxiosInstance;
-    private options: YAuthConfigurations;
-    private _useStorage: boolean;
+    private options: YAuthEndpointConfiguration;
+    private _useUserStore: boolean;
     private _useTokenStore: boolean;
 
     constructor(options: YAuthClientOptions, config?: TConfig) {
@@ -31,17 +31,18 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         this.apiBaseUrl = options.apiBaseUrl;
         this.authApiPrefix = options.authApiPrefix || "/auth";
         this.accountApiPrefix = options.accountApiPrefix || "/account";
-        this._useStorage = options.useStorage ?? true;
+        this._useUserStore = options.useUserStore ?? true;
         this._useTokenStore = options.useTokenStore ?? true;
-        if (this._useStorage || this._useTokenStore) {
+        if (this._useUserStore || this._useTokenStore) {
             this.storage = options.storage || yAuthDefaultStorage;
         }
         this.axios = options.axiosInstance;
         this.options = {
             ...defaultClientOptions,
-            ...(options.yAuthConfig || {}),
+            ...(options.endpointConfig || {}),
         };
     }
+
 
     private validateOptions(options: YAuthClientOptions) {
         const invalidPrefixes: string[] = [];
@@ -64,16 +65,8 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     private onSignIn: <T>(userData: T) => void = () => {};
     private onSignOut: () => void = () => {};
 
-    public configureEndpoints(endpointConfig: Partial<YAuthConfigurations>) {
-        this.options = { ...this.options, ...endpointConfig };
-    }
-
-    public getOptions() : YAuthConfigurations{
-        return this.options;
-    }
-
-    public get useStorage(): boolean {
-        return this._useStorage;
+    public get useUserStore(): boolean {
+        return this._useUserStore;
     }
 
     public get useTokenStore(): boolean {
@@ -95,8 +88,6 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     async signIn(params: MC<TConfig>["signIn"]["params"]): Promise<MC<TConfig>["signIn"]["result"]> {
         const response = await this.axios.post<MC<TConfig>["signIn"]["result"]>(`${this.authApiPrefix}${this.options.signInEndpoint}`, params);
         const user = response.data as MC<TConfig>["signIn"]["result"];
-        // if (this.useStorage) this.storage!.setUser(user);
-        // if(this.useTokenStore) this.storage!.setToken(user.access_token);  
         this.invokeStore<typeof user>(user, "signIn");      
         this.onSignIn && this.onSignIn(user);
         return user;
@@ -105,7 +96,7 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     async signUp(params: MC<TConfig>["signUp"]["params"]): Promise<MC<TConfig>["signUp"]["result"]> {
         const response = await this.axios.post<MC<TConfig>["signUp"]["result"]>(`${this.authApiPrefix}${this.options.signUpEndpoint}`, params);
         const user = response.data;
-        if (this.useStorage) this.storage!.setUser(user);
+        if (this.useUserStore) this.storage!.setUser(user);
         if(this.useTokenStore) this.storage!.setToken(user.access_token); 
         return user as MC<TConfig>["signUp"]["result"];
     }
@@ -115,21 +106,6 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         this.invokeClear();
         this.onSignOut && this.onSignOut();
         return {success: true} as MC<TConfig>["signOut"]["result"];
-    }
-
-    private invokeStore<T>(userData: T, type: "signIn" | "signUp"){
-        let data: MC<TConfig>["signIn"]["result"] | MC<TConfig>["signUp"]["result"];
-        if(type === "signIn")
-            data = userData as MC<TConfig>["signIn"]["result"]
-        else 
-            data = userData as MC<TConfig>["signUp"]["result"] 
-        if(this.useStorage) this.storage!.setUser(data);
-        if(this.useTokenStore) this.storage!.setToken(data.access_token);   
-    }
-
-    private invokeClear(){
-        if(this.useStorage) this.storage!.clearToken()
-        if(this.useTokenStore) this.storage!.clearUser();
     }
 
     async whoAmI() : Promise<MC<TConfig>["whoAmI"]["result"]>{
@@ -203,7 +179,7 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         if(this.useTokenStore)this.storage!.setToken(response.access_token);
         const whoAmIRes = await this.axios.get<MC<TConfig>["whoAmI"]["result"]>(this.authApiPrefix + '/whoami');
         const userRes = whoAmIRes.data;
-        if(this.useStorage)this.storage!.setUser(userRes);
+        if(this.useUserStore)this.storage!.setUser(userRes);
         if (this.onSignIn) this.onSignIn(userRes);
         if(type === "SignIn"){
             return userRes as MC<TConfig>["signInExternal"]["result"];
@@ -245,6 +221,21 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
                 return Promise.reject(error);
             }
         };
+    }
+
+    private invokeStore<T>(userData: T, type: "signIn" | "signUp"){
+        let data: MC<TConfig>["signIn"]["result"] | MC<TConfig>["signUp"]["result"];
+        if(type === "signIn")
+            data = userData as MC<TConfig>["signIn"]["result"]
+        else 
+            data = userData as MC<TConfig>["signUp"]["result"] 
+        if(this.useUserStore) this.storage!.setUser(data);
+        if(this.useTokenStore) this.storage!.setToken(data.access_token);   
+    }
+
+    private invokeClear(){
+        if(this.useUserStore) this.storage!.clearToken()
+        if(this.useTokenStore) this.storage!.clearUser();
     }
 }
 

@@ -1,7 +1,7 @@
 import { InternalAxiosRequestConfig } from "axios";
 import { BaseAuthClientConfig, YAuthStorage } from "./types";
 
-export function defineAuthConfig<T extends Partial<BaseAuthClientConfig>>(config: T) {
+export function defineSchema<T extends Partial<BaseAuthClientConfig>>(config: T) {
     return config;
 }
 

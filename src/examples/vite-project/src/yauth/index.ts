@@ -1,25 +1,30 @@
 import { createAxiosInstance } from "../../../../../dist";
+import { YAuthClientOptions } from "../../../../types";
 import { YAuth } from '../../../../yauth-core';
-import { defineAuthConfig } from "../../../../yauth-utils";
+import { defineSchema } from "../../../../yauth-utils";
 import { loginSchema } from "./login";
 import { registerSchema } from "./register";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL;
+export const axiosInstance = createAxiosInstance(apiBaseUrl);
 
-const authConfig = defineAuthConfig({
+const schemas = defineSchema({    
     ...registerSchema,
     ...loginSchema
 })
 
-export const axiosInstance = createAxiosInstance(apiBaseUrl);
-
-export const yauthInstance = new YAuth({ 
+const options : YAuthClientOptions = { 
     apiBaseUrl, 
     axiosInstance,
-    yAuthConfig: {
+    endpointConfig: {
         signInEndpoint: "/login",
     }
-},authConfig);
+}
+
+const yauthInstance = new YAuth(options, schemas);
+
 
 export default yauthInstance;
+
+
 
