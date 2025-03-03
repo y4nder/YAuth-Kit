@@ -15,6 +15,7 @@
 - 📧 **Email confirmation & verification**
 
 ---
+🚀<a href="https://www.npmjs.com/package/yauth-kit?activeTab=readme">YAuth NPM</a>
 
 ## 🛠 Installation
 
