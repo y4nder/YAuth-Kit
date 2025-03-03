@@ -1,9 +1,9 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { AuthResponse, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions } from '../types';
+import { AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions } from '../types';
 import { YAuth } from '../yauth-core';
 import mockAxios from 'jest-mock-axios';
 import { defineSchema } from '../yauth-utils';
-import { ChangePasswordRequest } from '../../dist';
+
 
 const apiBaseUrl = "http://localhost:3000";
 const authApiPrefix = "/auth";
@@ -95,6 +95,7 @@ describe("YAuth Core", () => {
             });
 
             const auth = new YAuth(options, signInConfig);
+            
         
             const mockData: CustomSignIn = { username: "user123", email: "test@example.com", password: "password123" };
             const mockResult: CustomSignInResult = { email: "test@example.com", access_token: "test-token", gwapo: true };
@@ -102,10 +103,12 @@ describe("YAuth Core", () => {
             mockAxios.post.mockResolvedValueOnce({ data: mockResult });
             const result = await auth.signIn(mockData);
 
+            expect(auth.getUser()).toEqual(result);
             expect(mockAxios.post).toHaveBeenCalledWith(expect.stringContaining(options.authApiPrefix!), mockData);
             expect(result).toEqual(mockResult);
             expect(mockStorage.setUser).toHaveBeenCalledWith(mockResult);
             expect(mockStorage.setToken).toHaveBeenCalledWith(mockResult.access_token);
+            
         });
     });
 
@@ -117,7 +120,8 @@ describe("YAuth Core", () => {
             
             mockAxios.post.mockResolvedValueOnce({ data: mockResult });
             const result = await auth.signUp(mockData);
-            
+
+            expect(auth.getUser()).toEqual(mockResult);
             expect(mockStorage.setUser).toHaveBeenCalledWith(result);
             expect(mockStorage.setToken).toHaveBeenCalledWith(result.access_token);
             expect(result).toEqual(mockResult);
@@ -137,10 +141,10 @@ describe("YAuth Core", () => {
             
             mockAxios.post.mockResolvedValueOnce({ data: mockResult });
             const result = await auth.signUp(mockData);
-            
             expect(mockStorage.setUser).toHaveBeenCalledWith(result);
             expect(mockStorage.setToken).toHaveBeenCalledWith(result.access_token);
             expect(result).toEqual(mockResult);
+            
         });
     });
 
@@ -389,62 +393,62 @@ describe("YAuth Core", () => {
         
             const auth = new YAuth(options, mergedConfig);
         })
+        test("overriding an endpoint", async () => {
+            const auth = new YAuth({
+                ...options, 
+                authApiPrefix: "/auth2",
+                endpointConfig:{
+                    signInEndpoint: "/login"
+                }
+            });
+    
+            mockAxios.post.mockResolvedValueOnce({data: {access_token: "some token"}});
+    
+            const mockData = {
+                email: 'some@some.com',
+                password: '12345'
+            };
+    
+            await auth.signIn(mockData) ;
+    
+            expect(mockAxios.post).toHaveBeenCalledWith("/auth2/login", mockData);
+        })
+    
+        test("invalid prefix should fail",async () => {
+            expect(() => new YAuth({
+                ...options, 
+                authApiPrefix: "auth2", // ❌ Invalid prefix (missing "/")
+            })).toThrow();
+        })
+    
+        test("should use storage and token store", () => {
+            const auth = new YAuth(options);
+    
+            expect(auth.useUserStore).toBe(true);
+            expect(auth.useTokenStore).toBe(true);
+        })
+    
+        test("should override storage mechanism", () => {
+            const auth = new YAuth({...options, useUserStore: false});   
+    
+            expect(auth.useUserStore).toBe(false);
+            expect(auth.useTokenStore).toBe(true);
+        })
+    
+        test("should override token store mechanism", () => {
+            const auth = new YAuth({...options, useTokenStore: false});   
+    
+            expect(auth.useUserStore).toBe(true);
+            expect(auth.useTokenStore).toBe(false);
+        })
+    
+        test("should override both store mechanism", () => {
+            const auth = new YAuth({...options, useTokenStore: false, useUserStore: false});   
+    
+            expect(auth.useUserStore).toBe(false);
+            expect(auth.useTokenStore).toBe(false);
+        })
     })
     
-    test("overriding an endpoint", async () => {
-        const auth = new YAuth({
-            ...options, 
-            authApiPrefix: "/auth2",
-            endpointConfig:{
-                signInEndpoint: "/login"
-            }
-        });
-
-        mockAxios.post.mockResolvedValueOnce({data: {access_token: "some token"}});
-
-        const mockData = {
-            email: 'some@some.com',
-            password: '12345'
-        };
-
-        await auth.signIn(mockData) ;
-
-        expect(mockAxios.post).toHaveBeenCalledWith("/auth2/login", mockData);
-    })
-
-    test("invalid prefix should fail",async () => {
-        expect(() => new YAuth({
-            ...options, 
-            authApiPrefix: "auth2", // ❌ Invalid prefix (missing "/")
-        })).toThrow();
-    })
-
-    test("should use storage and token store", () => {
-        const auth = new YAuth(options);
-
-        expect(auth.useUserStore).toBe(true);
-        expect(auth.useTokenStore).toBe(true);
-    })
-
-    test("should override storage mechanism", () => {
-        const auth = new YAuth({...options, useUserStore: false});   
-
-        expect(auth.useUserStore).toBe(false);
-        expect(auth.useTokenStore).toBe(true);
-    })
-
-    test("should override token store mechanism", () => {
-        const auth = new YAuth({...options, useTokenStore: false});   
-
-        expect(auth.useUserStore).toBe(true);
-        expect(auth.useTokenStore).toBe(false);
-    })
-
-    test("should override both store mechanism", () => {
-        const auth = new YAuth({...options, useTokenStore: false, useUserStore: false});   
-
-        expect(auth.useUserStore).toBe(false);
-        expect(auth.useTokenStore).toBe(false);
-    })
     
 });

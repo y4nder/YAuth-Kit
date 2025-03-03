@@ -88,22 +88,21 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
     async signIn(params: MC<TConfig>["signIn"]["params"]): Promise<MC<TConfig>["signIn"]["result"]> {
         const response = await this.axios.post<MC<TConfig>["signIn"]["result"]>(`${this.authApiPrefix}${this.options.signInEndpoint}`, params);
         const user = response.data as MC<TConfig>["signIn"]["result"];
-        this.invokeStore<typeof user>(user, "signIn");      
+        this.invokeUseStores<typeof user>(user, "signIn");      
         this.onSignIn && this.onSignIn(user);
         return user;
     }
 
     async signUp(params: MC<TConfig>["signUp"]["params"]): Promise<MC<TConfig>["signUp"]["result"]> {
         const response = await this.axios.post<MC<TConfig>["signUp"]["result"]>(`${this.authApiPrefix}${this.options.signUpEndpoint}`, params);
-        const user = response.data;
-        if (this.useUserStore) this.storage!.setUser(user);
-        if(this.useTokenStore) this.storage!.setToken(user.access_token); 
-        return user as MC<TConfig>["signUp"]["result"];
+        const user = response.data as MC<TConfig>["signUp"]["result"];
+        this.invokeUseStores<typeof user>(user, "signUp");
+        return user;
     }
 
     async signOut(): Promise<MC<TConfig>["signOut"]["result"]> {
         await this.axios.post(`${this.authApiPrefix}${this.options.signOutEndpoint}`);
-        this.invokeClear();
+        this.invokeClearStores();
         this.onSignOut && this.onSignOut();
         return {success: true} as MC<TConfig>["signOut"]["result"];
     }
@@ -203,7 +202,7 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
                 originalConfig._retry = true;
                 return tryRefreshToken(originalConfig);
             } else if (error.response?.status === 401 && !expired) {
-                this.invokeClear();
+                this.invokeClearStores();
                 onSignOut && onSignOut();
             }
 
@@ -215,7 +214,7 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
                 await this.refreshToken();
                 return this.axios.request(originalRequestConfig);
             } catch (error) {
-                this.invokeClear();
+                this.invokeClearStores();
                 onSignOut && onSignOut();
 
                 return Promise.reject(error);
@@ -223,7 +222,7 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         };
     }
 
-    private invokeStore<T>(userData: T, type: "signIn" | "signUp"){
+    private invokeUseStores<T>(userData: T, type: "signIn" | "signUp"){
         let data: MC<TConfig>["signIn"]["result"] | MC<TConfig>["signUp"]["result"];
         if(type === "signIn")
             data = userData as MC<TConfig>["signIn"]["result"]
@@ -233,7 +232,7 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         if(this.useTokenStore) this.storage!.setToken(data.access_token);   
     }
 
-    private invokeClear(){
+    private invokeClearStores(){
         if(this.useUserStore) this.storage!.clearToken()
         if(this.useTokenStore) this.storage!.clearUser();
     }
