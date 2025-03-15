@@ -143,6 +143,11 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         });
     }
 
+    async accountInfo() : Promise<MC<TConfig>["accountInfo"]["result"]>{
+        const response = await this.axios.get<MC<TConfig>["accountInfo"]["result"]>(`${this.accountApiPrefix}${this.options.accountInfoEndpoint}`);
+        return response.data;
+    }
+
     externalChallenge(data: MC<TConfig>["externalChallenge"]["params"]){
         const callBackUrl = data.mode === "SignIn"
             ? window.location.origin + "/external-challenge-callback" + data.provider
@@ -173,6 +178,8 @@ export class YAuth<TConfig extends Partial<BaseAuthClientConfig>> {
         const user = await this.handleExternalResponse(tokenRes.data, "SignIn");
         return user as MC<TConfig>["signInExternal"]["result"];
     }
+
+    
 
     private async handleExternalResponse(response: MC<TConfig>["refreshToken"]["result"], type: ExternalStrategy){
         if(this.useTokenStore)this.storage!.setToken(response.access_token);

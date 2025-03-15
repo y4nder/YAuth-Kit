@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions } from '../types';
+import { AccountInfoResponse, AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions } from '../types';
 import { YAuth } from '../yauth-core';
 import mockAxios from 'jest-mock-axios';
 import { defineSchema } from '../yauth-utils';
@@ -253,6 +253,23 @@ describe("YAuth Core", () => {
             const res = await auth.resendEmailConfirmation(mockData);
 
             expect(res).toMatchObject({} as AxiosResponse);
+        })
+    })
+
+    describe("account info", () => {
+        test("should accept code and userId ", async () => {
+            const auth = new YAuth(options);
+            const mockResult : AccountInfoResponse = {
+                email: 'email@email.com',
+                userName: 'yander',
+                roles: ['admin', 'user'],
+                logins: ['google', 'facebook'],
+                hasPassword: true
+            }
+            mockAxios.get.mockResolvedValueOnce({data: mockResult});
+            const res = await auth.accountInfo();
+            expect(res).toEqual(mockResult);
+            expect(mockAxios.get).toHaveBeenCalledWith("/account/info");
         })
     })
 

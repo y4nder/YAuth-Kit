@@ -22,6 +22,7 @@ export type YAuthEndpointConfiguration = {
     changePasswordEndpoint?: string;
     resendEmailConfirmationEndpoint?: string;
     confirmEmailEndpoint?: string;
+    accountInfoEndpoint?: string;
 }
 
 
@@ -158,6 +159,10 @@ export interface BaseAuthClientConfig {
     signInExternal : {
         params? : unknown,
         result: AuthResponse
+    };
+    accountInfo: {
+        params?: unknown,
+        result: AccountInfoResponse
     }
 }
 
