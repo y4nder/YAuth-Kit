@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { AccountInfoResponse, AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions } from '../types';
+import { AccountInfoResponse, AuthResponse, ChangePasswordRequest, ExternalChallengeRequest, ExtractYAuthResult, ResetPasswordRequest, SignInRequest, SignUpRequest, TokenResponse, WhoAmIResponse, YAuthClientOptions } from '../types';
 import { YAuth } from '../yauth-core';
 import mockAxios from 'jest-mock-axios';
 import { defineSchema } from '../yauth-utils';
@@ -467,5 +467,54 @@ describe("YAuth Core", () => {
         })
     })
     
+    describe("extract result type", () => {
+        test("should extract result type", () => {
+            const auth = new YAuth(options);
+            type WhoAmIType = ExtractYAuthResult<typeof auth, "whoAmI">;
+            type SignInType = ExtractYAuthResult<typeof auth, "signIn">;
+            
+            // Type assertions (these are compile-time checks)
+            const whoAmIResult: WhoAmIType = {
+                username: "test",
+                email: "test@example.com",
+                roles: ["user"]
+            };
+
+            const signInResult: SignInType = {
+                email: "test@example.com",
+                access_token: "token123"
+            };
+
+            // Runtime checks just to make TypeScript happy
+            expect(whoAmIResult.username).toBe("test");
+            expect(signInResult.access_token).toBe("token123");
+        });
+
+        test("should extract custom result type", () => {
+            interface CustomSignInResult extends AuthResponse {
+                customField: string;
+            }
+
+            const customConfig = defineSchema({
+                signIn: {
+                    params: {} as SignInRequest,
+                    result: {} as CustomSignInResult
+                }
+            });
+
+            const auth = new YAuth(options, customConfig);
+            type CustomSignInType = ExtractYAuthResult<typeof auth, "signIn">;
+
+            // Type assertion (compile-time check)
+            const signInResult: CustomSignInType = {
+                email: "test@example.com",
+                access_token: "token123",
+                customField: "custom"
+            };
+
+            // Runtime check just to make TypeScript happy
+            expect(signInResult.customField).toBe("custom");
+        });
+    })
     
 });

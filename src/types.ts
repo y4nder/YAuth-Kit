@@ -172,18 +172,15 @@ export interface BaseAuthClientConfig {
  *
  * @template T - The YAuth instance type.
  * @template K - The key in the BaseAuthClientConfig to extract the result type from.
- *
- * @typedef {T extends YAuth<infer C> ? C extends Record<K, { result: infer R }> ? R : AuthResponse : AuthResponse} ExtracYAuthResult
- * - If T is a YAuth instance with a configuration C, and C has a property K with a result type R, then R is the extracted type.
- * - Otherwise, defaults to AuthResponse.
  */
 export type ExtractYAuthResult<
     T extends YAuth<any>, 
     K extends keyof BaseAuthClientConfig
-  > 
-  = T extends YAuth<infer C> ?
-      C extends Record<K, { result: infer R }> ?
-        R
-        : AuthResponse
-      : AuthResponse;
+> = T extends YAuth<infer C> 
+    ? K extends keyof C 
+        ? C[K] extends { result: any } 
+            ? C[K]['result']
+            : BaseAuthClientConfig[K]['result']
+        : BaseAuthClientConfig[K]['result']
+    : never;
   
